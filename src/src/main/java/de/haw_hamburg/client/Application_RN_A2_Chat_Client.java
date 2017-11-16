@@ -1,4 +1,4 @@
-package rn_a2_Chat.client;
+package src.main.java.de.haw_hamburg.client;
 
 public class Application_RN_A2_Chat_Client {
 
