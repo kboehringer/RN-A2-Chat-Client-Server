@@ -6,11 +6,13 @@ import src.main.java.de.haw_hamburg.server.messagingComponent.Message;
 
 public class Chatroom {
 
+	private String name;
 	private User creator;
 	private ArrayList<User> member;
 	private ArrayList<Message> messageHistory;
 	
-	public Chatroom(String username) {
+	public Chatroom(String nameChatroom, String username) {
+		this.name = nameChatroom;
 		this.creator = new User(username);
 		member = new ArrayList<>();
 		messageHistory = new ArrayList<>();
@@ -26,5 +28,9 @@ public class Chatroom {
 	
 	public void addMessage(String messageValues) {
 		messageHistory.add(new Message(messageValues));
+	}
+
+	public String getName() {
+		return name;
 	}
 }
