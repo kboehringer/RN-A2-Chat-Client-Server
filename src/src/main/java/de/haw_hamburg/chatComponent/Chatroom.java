@@ -1,8 +1,8 @@
-package src.main.java.de.haw_hamburg.server.chatComponent;
+package src.main.java.de.haw_hamburg.chatComponent;
 
 import java.util.ArrayList;
 
-import src.main.java.de.haw_hamburg.server.messagingComponent.Message;
+import src.main.java.de.haw_hamburg.messagingComponent.Message;
 
 public class Chatroom {
 

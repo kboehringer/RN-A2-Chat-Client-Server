@@ -1,4 +1,4 @@
-package src.main.java.de.haw_hamburg.server.chatComponent;
+package src.main.java.de.haw_hamburg.chatComponent;
 
 public class User {
 

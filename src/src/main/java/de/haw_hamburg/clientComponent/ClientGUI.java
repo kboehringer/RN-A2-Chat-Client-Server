@@ -1,5 +1,6 @@
-package src.main.java.de.haw_hamburg.client;
+package src.main.java.de.haw_hamburg.clientComponent;
 
+import java.awt.Color;
 import java.awt.EventQueue;
 
 import javax.swing.JButton;
@@ -12,12 +13,13 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 
-public class ClientGUI extends JFrame {
+public class ClientGUI /**extends JFrame**/ {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+	private JFrame frame;
 	private JPanel contentPane;
 	private JTextField userNameTextField;
 	private JTextField addressTextField;
@@ -30,33 +32,36 @@ public class ClientGUI extends JFrame {
 	private JLabel lblAddress;
 	private JLabel lblYourUsername;
 	private JLabel lblTypeMessage;
+	private JButton loginButton;
+	private JTextArea messageOutputTextArea;
 
 	/**
 	 * Launch the application.
 	 */
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					ClientGUI frame = new ClientGUI();
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
+//	public static void main(String[] args) {
+//		EventQueue.invokeLater(new Runnable() {
+//			public void run() {
+//				try {
+//					ClientGUI frame = new ClientGUI();
+//					frame.setVisible(true);
+//				} catch (Exception e) {
+//					e.printStackTrace();
+//				}
+//			}
+//		});
+//	}
 
 	/**
 	 * Create the frame.
 	 */
 	public ClientGUI() {
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 800, 650);
-		setResizable(false);
+		frame = new JFrame("Chat-Client");
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setBounds(100, 100, 800, 650);
+		frame.setResizable(false);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-		setContentPane(contentPane);
+		frame.setContentPane(contentPane);
 		contentPane.setLayout(null);
 		
 		userNameTextField = new JTextField();
@@ -69,7 +74,7 @@ public class ClientGUI extends JFrame {
 		contentPane.add(addressTextField);
 		addressTextField.setColumns(10);
 		
-		JButton loginButton = new JButton("login");
+		loginButton = new JButton("login");
 		loginButton.setBounds(38, 133, 97, 25);
 		contentPane.add(loginButton);
 		
@@ -78,6 +83,7 @@ public class ClientGUI extends JFrame {
 		contentPane.add(scrollPane);
 		
 		chatroomTable = new JTable();
+		chatroomTable.setRowSelectionAllowed(true);
 		scrollPane.setViewportView(chatroomTable);
 		
 		newChatroomTextField = new JTextField();
@@ -97,7 +103,9 @@ public class ClientGUI extends JFrame {
 		messageViewScrollPane.setBounds(237, 28, 487, 464);
 		contentPane.add(messageViewScrollPane);
 		
-		JTextArea messageOutputTextArea = new JTextArea();
+		messageOutputTextArea = new JTextArea();
+		messageOutputTextArea.setEditable(false);
+		messageOutputTextArea.setBackground(Color.WHITE);
 		messageViewScrollPane.setViewportView(messageOutputTextArea);
 		
 		messageInputTextField = new JTextField();
@@ -116,5 +124,39 @@ public class ClientGUI extends JFrame {
 		lblTypeMessage = new JLabel("Type message:");
 		lblTypeMessage.setBounds(237, 501, 102, 16);
 		contentPane.add(lblTypeMessage);
+		
+		frame.setVisible(true);
+	}
+
+	public JTextField getUserNameTextField() {
+		return userNameTextField;
+	}
+
+	public JTextField getAddressTextField() {
+		return addressTextField;
+	}
+
+	public JTable getChatroomTable() {
+		return chatroomTable;
+	}
+
+	public JTextField getNewChatroomTextField() {
+		return newChatroomTextField;
+	}
+
+	public JScrollPane getMessageViewScrollPane() {
+		return messageViewScrollPane;
+	}
+
+	public JTextField getMessageInputTextField() {
+		return messageInputTextField;
+	}
+
+	public JButton getLoginButton() {
+		return loginButton;
+	}
+
+	public JTextArea getMessageOutputTextArea() {
+		return messageOutputTextArea;
 	}
 }

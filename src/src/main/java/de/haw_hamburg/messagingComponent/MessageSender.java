@@ -1,4 +1,4 @@
-package src.main.java.de.haw_hamburg.server.messagingComponent;
+package src.main.java.de.haw_hamburg.messagingComponent;
 
 import java.io.IOException;
 import java.io.OutputStream;

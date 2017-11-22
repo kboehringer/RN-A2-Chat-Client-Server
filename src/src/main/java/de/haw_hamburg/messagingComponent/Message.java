@@ -1,8 +1,10 @@
-package src.main.java.de.haw_hamburg.server.messagingComponent;
+package src.main.java.de.haw_hamburg.messagingComponent;
 
 import java.util.Date;
 
-import src.main.java.de.haw_hamburg.server.ApplicationServer;
+import javax.naming.directory.InvalidAttributesException;
+
+import src.main.java.de.haw_hamburg.Contract;
 
 public class Message {
 	
@@ -18,7 +20,18 @@ public class Message {
 	
 	@SuppressWarnings("deprecation")
 	public Message(String text, String chatroomName, String userId) {
-		ApplicationServer.checkNull(text);
+		Contract.checkNull(text);
+		Contract.checkNull(chatroomName);
+		Contract.checkNull(userId);
+		if (text.isEmpty()) {
+			Contract.logException(new InvalidAttributesException("Messagetext sshould not be empty!"));
+		}
+		if (chatroomName.isEmpty()) {
+			Contract.logException(new InvalidAttributesException("ChatroomName should not be empty!"));
+		}
+		if (userId.isEmpty()) {
+			Contract.logException(new InvalidAttributesException("UserId should not be empty!"));
+		}
 		this.messageText = text;
 		this.userId = userId;
 		this.chatroomName = chatroomName;
@@ -31,6 +44,10 @@ public class Message {
 	}
 	
 	public Message(String messageValues) {
+		Contract.checkNull(messageValues);
+		if (messageValues.isEmpty()) {
+			Contract.logException(new InvalidAttributesException("MessageValues should not be empty!"));
+		}
 		String[] parts = messageValues.split(seperator);
 		this.year = parts[0];
 		this.month = parts[1];
