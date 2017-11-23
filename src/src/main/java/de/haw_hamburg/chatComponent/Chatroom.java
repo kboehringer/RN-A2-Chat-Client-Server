@@ -2,23 +2,25 @@ package src.main.java.de.haw_hamburg.chatComponent;
 
 import java.util.ArrayList;
 
-import src.main.java.de.haw_hamburg.messagingComponent.Message;
-
 public class Chatroom {
 
 	private String name;
-	private ArrayList<User> member;
+	private ArrayList<Client> member;
 	
 	public Chatroom(String nameChatroom) {
 		this.name = nameChatroom;
 		member = new ArrayList<>();
 	}
 	
-	public void addUser(User user) {
+	public void addUser(Client user) {
 		member.add(user);
 	}
 	
 	public String getName() {
 		return name;
+	}
+
+	public ArrayList<Client> getMember() {
+		return member;
 	}
 }

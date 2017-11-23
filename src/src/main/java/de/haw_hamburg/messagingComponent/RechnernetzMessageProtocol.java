@@ -20,6 +20,7 @@ public class RechnernetzMessageProtocol {
 	private ArrayList<MessageSender> messageSenders;
 	private ArrayList<MessageReceiver> messageReceivers;
 	private ArrayList<MessageHandler> incommingMessageHandler;
+	private final Object MONITOR;
 //	private ScheduledExecutorService receiversExecutor;
 
 	public RechnernetzMessageProtocol() {
@@ -39,8 +40,15 @@ public class RechnernetzMessageProtocol {
 			Contract.logException(e);
 		}
 	}
+	
+	private String prepareMessage(String message) {
+		String preparedMessage = "";
+		
+		return preparedMessage;
+	}
 
-	public void sendMessage(String message) throws UnknownHostException, IOException {
+	public void sendMessage(String message) {
+		message = prepareMessage(message);
 		for (MessageSender sender : messageSenders) {
 			if (sender.isAlive()) {
 				sender.addMessage(message);
@@ -49,14 +57,21 @@ public class RechnernetzMessageProtocol {
 	}
 
 	public void receiveMessage(String message) {
-		String command = message.substring(0, 3);
-		switch (command) {
-		case "":
-			
-			break;
-
-		default:
-			break;
+		synchronized (MONITOR) {
+			String command = message.substring(0, 3);
+			switch (command) {
+			case "gcr": //Get Chatrooms
+				
+				break;
+			case "lcr": //List of Chatrooms
+				
+				break;
+			case "msg": //Is Message
+				
+				break;
+			default:
+				break;
+			}
 		}
 	}
 }

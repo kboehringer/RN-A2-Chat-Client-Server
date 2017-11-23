@@ -10,8 +10,9 @@ import javax.net.SocketFactory;
 
 import src.main.java.de.haw_hamburg.Contract;
 import src.main.java.de.haw_hamburg.clientComponent.ApplicationClient;
+import src.main.java.de.haw_hamburg.serverComponent.ServerProtocoll.ClientConnection;
 
-public class User {
+public class Client {
 
 	private String name;
 	private SocketFactory socketFactory = (SocketFactory) SocketFactory.getDefault();
@@ -19,7 +20,7 @@ public class User {
 	private BufferedReader inputStream;
     private PrintWriter outputStream;
 	
-	public User(String name) {
+	public Client(String name) {
 		this.name = name;
 	}
 
