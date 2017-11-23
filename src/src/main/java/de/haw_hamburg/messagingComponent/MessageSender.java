@@ -15,7 +15,7 @@ public class MessageSender extends Thread {
 
 	public MessageSender(PrintWriter messageOut) throws IOException {
 		this.messageList = new LinkedList<>();
-//		start();
+		start();
 	}
 	
 	public void addMessage(String message) {

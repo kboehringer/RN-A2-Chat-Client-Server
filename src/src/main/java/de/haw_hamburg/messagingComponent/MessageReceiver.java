@@ -9,7 +9,7 @@ import java.util.concurrent.Callable;
 
 import src.main.java.de.haw_hamburg.Contract;
 
-public class MessageReceiver extends Thread implements Callable<ArrayList<String>> {
+public class MessageReceiver extends Thread {
 	private final LinkedList<String> incommingMessageList;
 	private InputStream inputStream;
 	private Scanner inputScanner;
@@ -18,7 +18,7 @@ public class MessageReceiver extends Thread implements Callable<ArrayList<String
 		this.inputStream = inputStream;
 		inputScanner = new Scanner(inputStream);
 		incommingMessageList = new LinkedList<>();
-//		start();
+		start();
 	}
 	
 	public boolean hasMessage() {
@@ -50,16 +50,5 @@ public class MessageReceiver extends Thread implements Callable<ArrayList<String
 				Contract.logException(e);
 			}
 		}
-	}
-
-	@Override
-	public ArrayList<String> call() throws Exception {
-		ArrayList<String> messages = new ArrayList<>();
-		synchronized (incommingMessageList) {
-			for (int i = 0; i < incommingMessageList.size(); i++) {
-				messages.add(incommingMessageList.poll());
-			}
-		}
-		return messages;
 	}
 }

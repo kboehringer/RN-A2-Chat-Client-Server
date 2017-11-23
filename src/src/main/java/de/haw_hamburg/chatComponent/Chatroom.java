@@ -7,29 +7,17 @@ import src.main.java.de.haw_hamburg.messagingComponent.Message;
 public class Chatroom {
 
 	private String name;
-	private User creator;
 	private ArrayList<User> member;
-	private ArrayList<Message> messageHistory;
 	
-	public Chatroom(String nameChatroom, String username) {
+	public Chatroom(String nameChatroom) {
 		this.name = nameChatroom;
-		this.creator = new User(username);
 		member = new ArrayList<>();
-		messageHistory = new ArrayList<>();
 	}
 	
-	public void addUser(String username) {
-		member.add(new User(username));
+	public void addUser(User user) {
+		member.add(user);
 	}
 	
-	public void createMessage(String text, String userId) {
-		//TODO send message
-	}
-	
-	public void addMessage(String messageValues) {
-		messageHistory.add(new Message(messageValues));
-	}
-
 	public String getName() {
 		return name;
 	}

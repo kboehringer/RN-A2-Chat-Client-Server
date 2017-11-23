@@ -19,20 +19,22 @@ public class RechnernetzMessageProtocol {
 	private final String connectionEstablishing = "CONNECT+";
 	private ArrayList<MessageSender> messageSenders;
 	private ArrayList<MessageReceiver> messageReceivers;
-	private ScheduledExecutorService receiversExecutor;
+	private ArrayList<MessageHandler> incommingMessageHandler;
+//	private ScheduledExecutorService receiversExecutor;
 
 	public RechnernetzMessageProtocol() {
 		messageSenders = new ArrayList<>();
 		messageReceivers = new ArrayList<>();
-		receiversExecutor = Executors.newScheduledThreadPool(10);
+		incommingMessageHandler = new ArrayList<>();
+//		receiversExecutor = Executors.newScheduledThreadPool(10);
 	}
 
-	public void addConnection(String address, String userName) {
+	public void addConnection(String address, String userName, MessageHandler messageHandler) {
 		try {
 			Socket socket = new Socket(address, ApplicationServer.port);
 			messageSenders.add(new MessageSender(new PrintWriter(socket.getOutputStream(), false)));
 			messageReceivers.add(new MessageReceiver(socket.getInputStream()));
-			// receiversExecutor
+			incommingMessageHandler.add(messageHandler);
 		} catch (IOException e) {
 			Contract.logException(e);
 		}
@@ -46,4 +48,15 @@ public class RechnernetzMessageProtocol {
 		}
 	}
 
+	public void receiveMessage(String message) {
+		String command = message.substring(0, 3);
+		switch (command) {
+		case "":
+			
+			break;
+
+		default:
+			break;
+		}
+	}
 }
