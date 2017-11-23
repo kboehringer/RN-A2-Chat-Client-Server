@@ -7,16 +7,15 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.LinkedList;
 
-import src.main.java.de.haw_hamburg.server.ApplicationServer;
+import src.main.java.de.haw_hamburg.serverComponent.ApplicationServer;
 
 public class MessageSender extends Thread {
 	private final LinkedList<String> messageList;
 	private PrintWriter messageOut;
-	private boolean threadStop = false;
 
 	public MessageSender(PrintWriter messageOut) throws IOException {
 		this.messageList = new LinkedList<>();
-		start();
+//		start();
 	}
 	
 	public void addMessage(String message) {
@@ -27,7 +26,7 @@ public class MessageSender extends Thread {
 	
 	@Override
 	public void run() {
-		while (threadStop) {
+		while (!isInterrupted()) {
 			synchronized (messageList) {
 				if (!messageList.isEmpty()) {
 					messageOut.println(messageList.pop());
@@ -36,9 +35,5 @@ public class MessageSender extends Thread {
 			}
 		}
 		messageOut.flush();
-	}
-	
-	public void stopThread() {
-		threadStop = true;
 	}
 }

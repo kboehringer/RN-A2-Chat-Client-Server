@@ -2,20 +2,23 @@ package src.main.java.de.haw_hamburg.messagingComponent;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Scanner;
+import java.util.concurrent.Callable;
 
-public class MessageReceiver extends Thread{
+import src.main.java.de.haw_hamburg.Contract;
+
+public class MessageReceiver extends Thread implements Callable<ArrayList<String>> {
 	private final LinkedList<String> incommingMessageList;
 	private InputStream inputStream;
 	private Scanner inputScanner;
-	private boolean threadStop = false;
 	
 	public MessageReceiver(InputStream inputStream) {
 		this.inputStream = inputStream;
 		inputScanner = new Scanner(inputStream);
 		incommingMessageList = new LinkedList<>();
-		start();
+//		start();
 	}
 	
 	public boolean hasMessage() {
@@ -29,7 +32,6 @@ public class MessageReceiver extends Thread{
 		if (hasMessage()) {
 			synchronized (incommingMessageList) {
 				message = incommingMessageList.pop();
-				//TODO inform observer
 			}
 		}
 		return message;
@@ -37,22 +39,27 @@ public class MessageReceiver extends Thread{
 	
 	@Override
 	public void run() {
-		while (threadStop) {
+		while (!isInterrupted()) {
 			try {
 				if (inputStream.available() > 0 && inputScanner.hasNextLine()) {
-//					synchronized (incommingMessageList) {
-//						incommingMessageList.push(inputScanner.nextLine());
-//					}
-					System.out.println(inputScanner.nextLine());
+					synchronized (incommingMessageList) {
+						incommingMessageList.push(inputScanner.nextLine());
+					}
 				}
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				Contract.logException(e);
 			}
 		}
 	}
-	
-	public void stopThread() {
-		threadStop = true;
+
+	@Override
+	public ArrayList<String> call() throws Exception {
+		ArrayList<String> messages = new ArrayList<>();
+		synchronized (incommingMessageList) {
+			for (int i = 0; i < incommingMessageList.size(); i++) {
+				messages.add(incommingMessageList.poll());
+			}
+		}
+		return messages;
 	}
 }

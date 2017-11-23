@@ -1,4 +1,4 @@
-package src.main.java.de.haw_hamburg.server;
+package src.main.java.de.haw_hamburg.serverComponent;
 
 import src.main.java.de.haw_hamburg.Contract;
 

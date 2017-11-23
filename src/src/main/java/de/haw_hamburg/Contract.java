@@ -7,7 +7,7 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import src.main.java.de.haw_hamburg.server.ApplicationServer;
+import src.main.java.de.haw_hamburg.serverComponent.ApplicationServer;
 
 public class Contract {
 

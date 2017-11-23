@@ -21,6 +21,7 @@ public class ClientGUIController {
 	
 	public ClientGUIController() {
 		gui = new ClientGUI();
+		protocol = new RechnernetzMessageProtocol();
 		handleControlls();
 	}
 
@@ -107,12 +108,7 @@ public class ClientGUIController {
 	}
 	
 	private void loginToServer(String username, String address) {
-		try {
-			protocol = new RechnernetzMessageProtocol(address, username);
-		} catch (IOException e) {
-			Contract.logException(e);
-			logoutFromServer();
-		}
+		protocol.addConnection(address, username);
 		
 	}
 	
