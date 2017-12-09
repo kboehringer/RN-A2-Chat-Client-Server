@@ -9,7 +9,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
 import src.main.java.de.haw_hamburg.Contract;
-import src.main.java.de.haw_hamburg.serverComponent.ApplicationServer;
+import src.main.java.de.haw_hamburg.server.ApplicationServer;
 
 public class RechnernetzMessageProtocol {
 

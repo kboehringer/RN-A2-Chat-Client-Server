@@ -7,10 +7,9 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import src.main.java.de.haw_hamburg.serverComponent.ApplicationServer;
+import src.main.java.de.haw_hamburg.server.ApplicationServer;
 
 public class Contract {
-
 	private static final Logger log = Logger.getLogger( ApplicationServer.class.getName());
 
 	public static void createLogger() {

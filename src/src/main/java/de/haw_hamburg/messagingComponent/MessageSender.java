@@ -7,7 +7,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.LinkedList;
 
-import src.main.java.de.haw_hamburg.serverComponent.ApplicationServer;
+import src.main.java.de.haw_hamburg.server.ApplicationServer;
 
 public class MessageSender extends Thread {
 	private final LinkedList<String> messageList;

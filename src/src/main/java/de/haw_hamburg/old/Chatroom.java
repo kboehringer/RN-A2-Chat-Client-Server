@@ -1,4 +1,4 @@
-package src.main.java.de.haw_hamburg.chatComponent;
+package src.main.java.de.haw_hamburg.old;
 
 import java.util.ArrayList;
 
