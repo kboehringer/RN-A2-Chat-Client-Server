@@ -19,26 +19,36 @@ public class RechnernetzMessageProtocol {
 	private final String connectionEstablishing = "CONNECT+";
 	private ArrayList<MessageSender> messageSenders;
 	private ArrayList<MessageReceiver> messageReceivers;
-	private ScheduledExecutorService receiversExecutor;
+	private ArrayList<MessageHandler> incommingMessageHandler;
+	private final Object MONITOR;
+//	private ScheduledExecutorService receiversExecutor;
 
 	public RechnernetzMessageProtocol() {
 		messageSenders = new ArrayList<>();
 		messageReceivers = new ArrayList<>();
-		receiversExecutor = Executors.newScheduledThreadPool(10);
+		incommingMessageHandler = new ArrayList<>();
+//		receiversExecutor = Executors.newScheduledThreadPool(10);
 	}
 
-	public void addConnection(String address, String userName) {
+	public void addConnection(String address, String userName, MessageHandler messageHandler) {
 		try {
 			Socket socket = new Socket(address, ApplicationServer.port);
 			messageSenders.add(new MessageSender(new PrintWriter(socket.getOutputStream(), false)));
 			messageReceivers.add(new MessageReceiver(socket.getInputStream()));
-			// receiversExecutor
+			incommingMessageHandler.add(messageHandler);
 		} catch (IOException e) {
 			Contract.logException(e);
 		}
 	}
+	
+	private String prepareMessage(String message) {
+		String preparedMessage = "";
+		
+		return preparedMessage;
+	}
 
-	public void sendMessage(String message) throws UnknownHostException, IOException {
+	public void sendMessage(String message) {
+		message = prepareMessage(message);
 		for (MessageSender sender : messageSenders) {
 			if (sender.isAlive()) {
 				sender.addMessage(message);
@@ -46,4 +56,22 @@ public class RechnernetzMessageProtocol {
 		}
 	}
 
+	public void receiveMessage(String message) {
+		synchronized (MONITOR) {
+			String command = message.substring(0, 3);
+			switch (command) {
+			case "gcr": //Get Chatrooms
+				
+				break;
+			case "lcr": //List of Chatrooms
+				
+				break;
+			case "msg": //Is Message
+				
+				break;
+			default:
+				break;
+			}
+		}
+	}
 }
