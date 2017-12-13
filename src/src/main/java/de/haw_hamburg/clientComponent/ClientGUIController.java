@@ -1,24 +1,20 @@
 package src.main.java.de.haw_hamburg.clientComponent;
 
-import java.awt.RenderingHints.Key;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JTable;
-import javax.xml.ws.handler.MessageContext;
 
-import src.main.java.de.haw_hamburg.Contract;
-import src.main.java.de.haw_hamburg.messagingComponent.MessageHandler;
 import src.main.java.de.haw_hamburg.messagingComponent.RechnernetzMessageProtocol;
+import src.main.java.de.haw_hamburg.server.Contract;
 
-public class ClientGUIController implements MessageHandler {
+public class ClientGUIController {
 	private ClientGUI gui;
 	private RechnernetzMessageProtocol protocol;
 	private boolean readyToLogIn = true;
@@ -114,7 +110,7 @@ public class ClientGUIController implements MessageHandler {
 	}
 	
 	private void loginToServer(String username, String address) {
-		protocol.addConnection(address, username, this);
+//		protocol.addConnection(address, username, this);
 		
 	}
 	
@@ -135,7 +131,7 @@ public class ClientGUIController implements MessageHandler {
 		
 	}
 
-	@Override
+//	@Override
 	public void handleIncommingMessage(List<String> messages) {
 		messageHistory.addAll(messages);
 	}

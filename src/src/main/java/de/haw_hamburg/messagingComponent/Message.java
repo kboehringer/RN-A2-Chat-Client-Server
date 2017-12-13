@@ -4,7 +4,7 @@ import java.util.Date;
 
 import javax.naming.directory.InvalidAttributesException;
 
-import src.main.java.de.haw_hamburg.Contract;
+import src.main.java.de.haw_hamburg.server.Contract;
 
 public class Message {
 	

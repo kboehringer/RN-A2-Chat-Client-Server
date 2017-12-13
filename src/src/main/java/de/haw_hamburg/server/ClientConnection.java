@@ -1,11 +1,10 @@
 package src.main.java.de.haw_hamburg.server;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Scanner;
+import java.util.Set;
 
 public class ClientConnection extends Thread {
 	private Socket socket;
@@ -13,6 +12,8 @@ public class ClientConnection extends Thread {
 	private PrintWriter output;
 	private String name = "";
 	private String chatroomName = "";
+	private final int maxNameLength = 32; //Namelength for Clients and Chatrooms
+	private final char seperator = '\t';
 	
 	public ClientConnection(Socket socket) {
 		this.socket = socket;
@@ -20,28 +21,40 @@ public class ClientConnection extends Thread {
 			this.input = new Scanner(socket.getInputStream());
 			this.output = new PrintWriter(socket.getOutputStream(), true);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Contract.logException(e);
 		}
 		start();
 	}
 	
+	/**
+	 * Runs the client, is called when creating this object.
+	 */
 	@Override
 	public void run() {
-		String inputMessage = "";
 		while (!isInterrupted()) {
 			if (input.hasNextLine()) {
-				handleInput(inputMessage);
+				handleInput(input.next());
 			}
 		}
+		input.close();
+		output.flush();
+		output.close();
 	}
 	
+	/**
+	 * Sends a without control-shortcut to this client.
+	 * @param message: String message.
+	 */
 	public void send(String message) {
 		synchronized (output) {
-			output.println(message);
+			output.println(message + seperator);
 		}
 	}
 	
+	/**
+	 * Decides what to do with the current input.
+	 * @param input: String input.
+	 */
 	private void handleInput(String input) {
 		if (input.length() < 2) {
 			returnError("Send message must be at least 2 Characters long!");
@@ -49,19 +62,28 @@ public class ClientConnection extends Thread {
 		int inputIndex = 2;
 		String command = input.substring(0, inputIndex);
 		switch (command) {
-		case "CC":
-			Chatroom chatroom = new Chatroom(input.substring(inputIndex));
-			synchronized (ApplicationServer.chatrooms) {
-				ApplicationServer.chatrooms.add(chatroom);
-			}
-			chatroom.enter(this);
-			chatroomName = chatroom.getName();
+		case "NM":
+			returnName(input.substring(inputIndex));
 			break;
 		case "GC":
 			returnChatrooms();
 			break;
 		case "EC":
-			enterChatroom(input.substring(inputIndex));
+			if (!name.isEmpty()) {
+				enterChatroom(input.substring(inputIndex));
+			} else {
+				returnError("The client has no name, so it cannot enter a chatroom!");
+			}
+			break;
+		case "MG":
+			if (!chatroomName.isEmpty()) {
+				shareMessage(input.substring(inputIndex));
+			} else {
+				returnError("The client ist not a member of a chatroom!");
+			}
+			break;
+		case "DC":
+			disconnect();
 			break;
 		default:
 			returnError("The command " + command + " is not valid!");
@@ -69,23 +91,98 @@ public class ClientConnection extends Thread {
 		}
 	}
 	
+	/**
+	 * Sets the name of this client. Cuts the input at a length of 32 if it is longer.
+	 * @param name: String name.
+	 */
+	private void returnName(String name) {
+		if (name.length() > maxNameLength) {
+			name = name.substring(0, maxNameLength);
+		}
+		this.name = name;
+		send("NM" + name);
+	}
+	
+	/**
+	 * Sends a list of the available chatrooms to this client.
+	 */
 	private void returnChatrooms() {
-		String controlChar = "*C";
+		String controlChar = "\t";
 		StringBuilder returnMessage = new StringBuilder("LC");
 		synchronized (ApplicationServer.chatrooms) {
-			for (Chatroom chatroom : ApplicationServer.chatrooms) {
-				returnMessage.append(chatroom.getName());
+			Set<String> chatroomNames = ApplicationServer.chatrooms.keySet();
+			for (String name : chatroomNames) {
+				returnMessage.append(name);
 				returnMessage.append(controlChar);
 			}
 		}
 		send(returnMessage.toString());
 	}
 	
+	/**
+	 * Enter a chatroom with this name. If there is no chatroom with this name,
+	 * a new chatroom will be created.
+	 * @param name: String name
+	 */
 	private void enterChatroom(String name) {
-		//TODO
+		if (name.length() > maxNameLength) {
+			name = name.substring(0, maxNameLength);
+		}
+		Chatroom chatroom;
+		synchronized (ApplicationServer.chatrooms) {
+			Set<String> chatroomNames = ApplicationServer.chatrooms.keySet();
+			if (chatroomNames.contains(name)) {
+				chatroom = ApplicationServer.chatrooms.get(name);
+			} else {
+				chatroom = new Chatroom(name);
+			}
+		}
+		chatroom.enter(this);
+		chatroomName = name;
+		send("EC" + name);
 	}
 	
+	/**
+	 * Sends an errortext to this client.
+	 * @param errorText String errortext.
+	 */
 	private void returnError(String errorText) {
 		send("ER" + errorText);
+	}
+	
+	/**
+	 * Sends a incomming message to all other clients in a chatroom.
+	 * @param substring String message.
+	 */
+	private void shareMessage(String substring) {
+		Chatroom chatroom;
+		synchronized (ApplicationServer.chatrooms) {
+			chatroom = ApplicationServer.chatrooms.get(chatroomName);
+		}
+		synchronized (chatroom.getClientList()) {
+			for (ClientConnection clientConnection : chatroom.getClientList()) {
+				if (!clientConnection.getName().equals(name)) {
+					clientConnection.send("MG" + substring);
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Removes this client from it's chatroom and closes the Connection.
+	 */
+	private void disconnect() {
+		Chatroom chatroom;
+		synchronized (ApplicationServer.chatrooms) {
+			chatroom = ApplicationServer.chatrooms.get(chatroomName);
+			chatroom.leave(this);
+		}
+		input.close();
+		output.close();
+		try {
+			socket.close();
+		} catch (IOException e) {
+			Contract.logException(e);
+		}
 	}
 }

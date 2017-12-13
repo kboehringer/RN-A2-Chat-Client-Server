@@ -7,7 +7,7 @@ import java.util.LinkedList;
 import java.util.Scanner;
 import java.util.concurrent.Callable;
 
-import src.main.java.de.haw_hamburg.Contract;
+import src.main.java.de.haw_hamburg.server.Contract;
 
 public class MessageReceiver extends Thread {
 	private final LinkedList<String> incommingMessageList;
