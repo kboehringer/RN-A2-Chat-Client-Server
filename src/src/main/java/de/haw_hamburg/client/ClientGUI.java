@@ -1,4 +1,4 @@
-package src.main.java.de.haw_hamburg.clientComponent;
+package src.main.java.de.haw_hamburg.client;
 
 import java.awt.Color;
 import java.awt.EventQueue;

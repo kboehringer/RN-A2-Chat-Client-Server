@@ -1,4 +1,4 @@
-package src.main.java.de.haw_hamburg.clientComponent;
+package src.main.java.de.haw_hamburg.client;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -6,24 +6,21 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
 
-import src.main.java.de.haw_hamburg.messagingComponent.RechnernetzMessageProtocol;
-import src.main.java.de.haw_hamburg.server.Contract;
+import src.main.java.de.haw_hamburg.Contract;
 
 public class ClientGUIController {
 	private ClientGUI gui;
-	private RechnernetzMessageProtocol protocol;
 	private boolean readyToLogIn = true;
-	private ArrayList<String> messageHistory;
+	private StringBuilder messageHistory;
+	private ServerConnection connection;
 	
 	public ClientGUIController() {
 		gui = new ClientGUI();
-		protocol = new RechnernetzMessageProtocol();
-		messageHistory = new ArrayList<>();
+		messageHistory = new StringBuilder();
 		handleControlls();
 	}
 
@@ -32,8 +29,6 @@ public class ClientGUIController {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-//				gui.getUserNameTextField().setEnabled(readyToLogIn);
-//				gui.getAddressTextField().setEnabled(readyToLogIn);
 				if (readyToLogIn) {
 					String userName = gui.getUserNameTextField().getText();
 					String address = gui.getAddressTextField().getText();
@@ -110,8 +105,7 @@ public class ClientGUIController {
 	}
 	
 	private void loginToServer(String username, String address) {
-//		protocol.addConnection(address, username, this);
-		
+		connection = new ServerConnection(address, this);
 	}
 	
 	private void logoutFromServer() {
@@ -131,8 +125,17 @@ public class ClientGUIController {
 		
 	}
 
-//	@Override
-	public void handleIncommingMessage(List<String> messages) {
-		messageHistory.addAll(messages);
+	public void setMessage(String message) {
+		messageHistory.append("\n" + message);
+		gui.getMessageOutputTextArea().setText(messageHistory.toString());
+	}
+	
+	public void setName(String name) {
+		gui.getUserNameTextField().setText(name);
+	}
+	
+	public void setChatroomList(String[] chatrooms) {
+		DefaultTableModel model = (DefaultTableModel) gui.getChatroomTable().getModel();
+		model.addRow(chatrooms);
 	}
 }

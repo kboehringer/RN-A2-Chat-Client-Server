@@ -59,4 +59,12 @@ public class Chatroom {
 	public List<ClientConnection> getClientList() {
 		return clientList;
 	}
+	
+	public void disconnect() {
+		synchronized (clientList) {
+			for (ClientConnection clientConnection : clientList) {
+				clientConnection.interrupt();
+			}
+		}
+	}
 }

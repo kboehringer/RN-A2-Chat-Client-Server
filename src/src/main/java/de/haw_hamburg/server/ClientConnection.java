@@ -6,6 +6,8 @@ import java.net.Socket;
 import java.util.Scanner;
 import java.util.Set;
 
+import src.main.java.de.haw_hamburg.Contract;
+
 public class ClientConnection extends Thread {
 	private Socket socket;
 	private Scanner input;
@@ -178,6 +180,7 @@ public class ClientConnection extends Thread {
 			chatroom.leave(this);
 		}
 		input.close();
+		output.flush();
 		output.close();
 		try {
 			socket.close();

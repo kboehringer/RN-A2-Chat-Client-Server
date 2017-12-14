@@ -1,4 +1,4 @@
-package src.main.java.de.haw_hamburg.server;
+package src.main.java.de.haw_hamburg;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -7,6 +7,8 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import src.main.java.de.haw_hamburg.server.ApplicationServer;
+
 public class Contract {
 	private static final Logger log = Logger.getLogger( ApplicationServer.class.getName());
 	private static boolean logging = false;
@@ -14,7 +16,7 @@ public class Contract {
 	public static void createLogger(boolean setLogging) {
 		logging = setLogging;
 		try {
-			Handler handler = new FileHandler( LocalDateTime.now().toString().replaceAll(":", "-") + " log.xml" );
+			Handler handler = new FileHandler(LocalDateTime.now().toString().replaceAll(":", "-") + " log.xml");
 			log.addHandler(handler);
 		} catch (SecurityException | IOException e) {
 			StringBuilder stack = new StringBuilder();

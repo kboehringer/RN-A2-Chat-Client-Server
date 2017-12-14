@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Set;
+
+import src.main.java.de.haw_hamburg.Contract;
 
 /**
  * A ConnectionListener listens for arriving connections. Every Instance of this
@@ -12,7 +15,6 @@ import java.util.ArrayList;
  */
 public class ConnectionListener extends Thread {
 	private ServerSocket serverSocket;
-	private ArrayList<ClientConnection> clientConnections;
 
 	/**
 	 * Creates a new ConnectionListener-Thread. The Thread starts automaticly.
@@ -23,7 +25,6 @@ public class ConnectionListener extends Thread {
 		} catch (IOException e) {
 			Contract.logException(e);
 		}
-		clientConnections = new ArrayList<>();
 		start();
 	}
 	
@@ -36,13 +37,15 @@ public class ConnectionListener extends Thread {
 			try {
 				Socket socket = serverSocket.accept();
 				ClientConnection clientConnection = new ClientConnection(socket);
-				clientConnections.add(clientConnection);
 			} catch (IOException e) {
 				Contract.logException(e);
 			}
 		}
-		for (ClientConnection clientConnection : clientConnections) {
-			clientConnection.interrupt();
+		synchronized (ApplicationServer.chatrooms) {
+			Set<String> chatrooms = ApplicationServer.chatrooms.keySet();
+			for (String chatroom : chatrooms) {
+				ApplicationServer.chatrooms.get(chatroom).disconnect();
+			}
 		}
 	}
 }

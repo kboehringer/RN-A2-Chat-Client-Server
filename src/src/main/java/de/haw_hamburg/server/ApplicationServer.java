@@ -1,10 +1,10 @@
 package src.main.java.de.haw_hamburg.server;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+
+import src.main.java.de.haw_hamburg.Contract;
 
 public class ApplicationServer {
 	public final static int port = 55533;
