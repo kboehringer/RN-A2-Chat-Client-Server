@@ -118,11 +118,11 @@ public class ClientGUIController {
 	
 	private void enterChatroom(String chatroomName) {
 		gui.getMessageInputTextField().setEnabled(true);
-		
+		connection.send("EC" + chatroomName);
 	}
 	
 	private void sendMessage(String text) {
-		
+		connection.send("MG" + text);
 	}
 
 	public void setMessage(String message) {

@@ -16,6 +16,7 @@ public class ApplicationServer {
 			Contract.createLogger(true);
 		}
 		try {
+			System.out.println("starte server.");
 			ConnectionListener connectionListener = new ConnectionListener();
 		} catch (Exception e) {
 			Contract.logException(e);

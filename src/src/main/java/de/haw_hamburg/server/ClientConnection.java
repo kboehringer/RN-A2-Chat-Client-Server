@@ -1,8 +1,10 @@
 package src.main.java.de.haw_hamburg.server;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.Set;
 
@@ -10,7 +12,7 @@ import src.main.java.de.haw_hamburg.Contract;
 
 public class ClientConnection extends Thread {
 	private Socket socket;
-	private Scanner input;
+	private InputStream input;
 	private PrintWriter output;
 	private String name = "";
 	private String chatroomName = "";
@@ -19,8 +21,9 @@ public class ClientConnection extends Thread {
 	
 	public ClientConnection(Socket socket) {
 		this.socket = socket;
+		System.out.println("erstelle verbindung.");
 		try {
-			this.input = new Scanner(socket.getInputStream());
+			this.input = socket.getInputStream();
 			this.output = new PrintWriter(socket.getOutputStream(), true);
 		} catch (IOException e) {
 			Contract.logException(e);
@@ -33,12 +36,19 @@ public class ClientConnection extends Thread {
 	 */
 	@Override
 	public void run() {
+		ArrayList<Byte> stream;
+		Byte b = new Byte("");
+		try {
 		while (!isInterrupted()) {
-			if (input.hasNextLine()) {
-				handleInput(input.next());
-			}
+			stream = new ArrayList<>();
+			do {
+				input.read();
+			} while (b.equals("\n"));
 		}
-		input.close();
+			input.close();
+		} catch (IOException e) {
+			Contract.logException(e);
+		}
 		output.flush();
 		output.close();
 	}
@@ -51,6 +61,7 @@ public class ClientConnection extends Thread {
 		synchronized (output) {
 			output.println(message + seperator);
 		}
+		System.out.println("output: " + message);
 	}
 	
 	/**
@@ -58,6 +69,7 @@ public class ClientConnection extends Thread {
 	 * @param input: String input.
 	 */
 	private void handleInput(String input) {
+		System.out.println("input: " + input);
 		if (input.length() < 2) {
 			returnError("Send message must be at least 2 Characters long!");
 		}
@@ -137,6 +149,7 @@ public class ClientConnection extends Thread {
 				chatroom = ApplicationServer.chatrooms.get(name);
 			} else {
 				chatroom = new Chatroom(name);
+				ApplicationServer.chatrooms.put(name, chatroom);
 			}
 		}
 		chatroom.enter(this);

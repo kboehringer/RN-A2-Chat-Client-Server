@@ -34,18 +34,14 @@ public class Contract {
 	}
 	
 	public static void LogInfo(String info) {
-		if (logging) {
-			log.log(Level.INFO, info);
-		}
+		log.log(Level.INFO, info);
 	}
 	
 	public static void logException(Exception e) {
-		if (logging) {
-			StringBuilder stack = new StringBuilder();
-			for (StackTraceElement trace : e.getStackTrace()) {
-				stack.append(trace.toString());
-			}
-			log.log(Level.WARNING, e.getMessage() + "\n" + stack);
+		StringBuilder stack = new StringBuilder();
+		for (StackTraceElement trace : e.getStackTrace()) {
+			stack.append(trace.toString());
 		}
+		log.log(Level.WARNING, e.getMessage() + "\n" + stack);
 	}
 }

@@ -54,10 +54,12 @@ public class ServerConnection extends Thread {
 		synchronized (output) {
 			output.println(message + seperator);
 		}
+		System.out.println("output: " + message);
 	}
 
 	private void handleInput(String input) {
 		Contract.LogInfo("Input: " + input);
+		System.out.println("input: " + input);
 		if (input.length() < 2) {
 			Contract.logException(new Exception("Send message must be at least 2 Characters long!"));
 		}
