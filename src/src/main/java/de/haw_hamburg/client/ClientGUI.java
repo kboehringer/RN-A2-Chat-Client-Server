@@ -1,7 +1,6 @@
 package src.main.java.de.haw_hamburg.client;
 
 import java.awt.Color;
-import java.awt.EventQueue;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -18,6 +17,7 @@ public class ClientGUI /**extends JFrame**/ {
 	/**
 	 * 
 	 */
+	@SuppressWarnings("unused")
 	private static final long serialVersionUID = 1L;
 	private JFrame frame;
 	private JPanel contentPane;

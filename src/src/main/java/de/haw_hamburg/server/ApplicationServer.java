@@ -17,6 +17,7 @@ public class ApplicationServer {
 		}
 		try {
 			System.out.println("starte server.");
+			@SuppressWarnings("unused")
 			ConnectionListener connectionListener = new ConnectionListener();
 		} catch (Exception e) {
 			Contract.logException(e);

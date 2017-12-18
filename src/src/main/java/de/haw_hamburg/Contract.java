@@ -11,6 +11,7 @@ import src.main.java.de.haw_hamburg.server.ApplicationServer;
 
 public class Contract {
 	private static final Logger log = Logger.getLogger( ApplicationServer.class.getName());
+	@SuppressWarnings("unused")
 	private static boolean logging = false;
 
 	public static void createLogger(boolean setLogging) {

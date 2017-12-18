@@ -3,7 +3,6 @@ package src.main.java.de.haw_hamburg.server;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.Set;
 
 import src.main.java.de.haw_hamburg.Contract;
@@ -36,6 +35,7 @@ public class ConnectionListener extends Thread {
 		while (!isInterrupted()) {
 			try {
 				Socket socket = serverSocket.accept();
+				@SuppressWarnings("unused")
 				ClientConnection clientConnection = new ClientConnection(socket);
 			} catch (IOException e) {
 				Contract.logException(e);

@@ -13,7 +13,6 @@ public class ServerConnection extends Thread {
 	private Scanner input;
 	private PrintWriter output;
 	private ClientGUIController clientGUIController;
-	private String chatroomName = "";
 	private final char seperator = '\t';
 
 	public ServerConnection(String hostAddress, ClientGUIController clientGUIController) {
@@ -52,7 +51,7 @@ public class ServerConnection extends Thread {
 	public void send(String message) {
 		Contract.LogInfo("Output: " + message);
 		synchronized (output) {
-			output.println(message + seperator);
+			output.println(message + "\n");
 		}
 		System.out.println("output: " + message);
 	}

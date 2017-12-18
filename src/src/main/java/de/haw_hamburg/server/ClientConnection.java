@@ -1,11 +1,13 @@
 package src.main.java.de.haw_hamburg.server;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Scanner;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 
 import src.main.java.de.haw_hamburg.Contract;
@@ -14,10 +16,13 @@ public class ClientConnection extends Thread {
 	private Socket socket;
 	private InputStream input;
 	private PrintWriter output;
+	private BufferedReader inputReader;
 	private String name = "";
 	private String chatroomName = "";
 	private final int maxNameLength = 32; //Namelength for Clients and Chatrooms
 	private final char seperator = '\t';
+	private final int maxInputSize = 1024;
+	private final List<String> commands = Arrays.asList(new String[] {"NM", "GC", "EC", "MG", "DC"});
 	
 	public ClientConnection(Socket socket) {
 		this.socket = socket;
@@ -25,6 +30,7 @@ public class ClientConnection extends Thread {
 		try {
 			this.input = socket.getInputStream();
 			this.output = new PrintWriter(socket.getOutputStream(), true);
+			this.inputReader = new BufferedReader(new InputStreamReader(socket.getInputStream()), maxInputSize);
 		} catch (IOException e) {
 			Contract.logException(e);
 		}
@@ -33,18 +39,50 @@ public class ClientConnection extends Thread {
 	
 	/**
 	 * Runs the client, is called when creating this object.
+	 * Waits for input from a client, input can at least be 1024 characters long.
 	 */
 	@Override
 	public void run() {
-		ArrayList<Byte> stream;
-		Byte b = new Byte("");
+		StringBuilder inputStream = new StringBuilder(maxInputSize);
+		char c = '-';
+		boolean throwAway = false;
 		try {
-		while (!isInterrupted()) {
-			stream = new ArrayList<>();
-			do {
-				input.read();
-			} while (b.equals("\n"));
-		}
+			while (!isInterrupted()) {
+				inputStream = new StringBuilder(maxInputSize);
+				while (inputReader.ready()) {
+					c = (char) inputReader.read();
+					//End reached and dont throwAway chars (positive case)
+					if (c == '\n' && !throwAway) {
+						handleInput(inputStream);
+						//Reset variable
+						c = '-';
+						break;
+					}
+					//End reached and input thrown away
+					if (c == '\n' && throwAway) {
+						//Reset variables
+						c = '-';
+						throwAway = false;
+						break;
+					}
+					//Max length reached
+					if (inputStream.length() >= maxInputSize) {
+						handleInput(inputStream);
+						inputStream = new StringBuilder(maxInputSize);
+						throwAway = true;
+					}
+					//Check for valid command
+					if (inputStream.length() == 2) {
+						String probableCommand = inputStream.toString();
+						if (!commands.contains(probableCommand)) {
+							throwAway = true;
+						}
+					}
+					if (!throwAway) {
+						inputStream.append(c);
+					}
+				}
+			}
 			input.close();
 		} catch (IOException e) {
 			Contract.logException(e);
@@ -68,7 +106,7 @@ public class ClientConnection extends Thread {
 	 * Decides what to do with the current input.
 	 * @param input: String input.
 	 */
-	private void handleInput(String input) {
+	private void handleInput(StringBuilder input) {
 		System.out.println("input: " + input);
 		if (input.length() < 2) {
 			returnError("Send message must be at least 2 Characters long!");
@@ -192,7 +230,6 @@ public class ClientConnection extends Thread {
 			chatroom = ApplicationServer.chatrooms.get(chatroomName);
 			chatroom.leave(this);
 		}
-		input.close();
 		output.flush();
 		output.close();
 		try {

@@ -109,7 +109,7 @@ public class ClientGUIController {
 	}
 	
 	private void logoutFromServer() {
-		//TODO protocol disconnect
+		connection.interrupt();
 		readyToLogIn = true;
 		gui.getLoginButton().setText("login");
 		gui.getNewChatroomTextField().setEnabled(false);
@@ -123,6 +123,7 @@ public class ClientGUIController {
 	
 	private void sendMessage(String text) {
 		connection.send("MG" + text);
+		gui.getMessageInputTextField().setText("");
 	}
 
 	public void setMessage(String message) {
@@ -135,7 +136,8 @@ public class ClientGUIController {
 	}
 	
 	public void setChatroomList(String[] chatrooms) {
-		DefaultTableModel model = (DefaultTableModel) gui.getChatroomTable().getModel();
+		DefaultTableModel model = new DefaultTableModel(new String[] {"Chatraeume"}, 1);
 		model.addRow(chatrooms);
+		gui.getChatroomTable().setModel(model);
 	}
 }
