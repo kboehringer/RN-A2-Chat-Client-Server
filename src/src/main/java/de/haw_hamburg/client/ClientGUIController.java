@@ -41,6 +41,7 @@ public class ClientGUIController {
 						readyToLogIn = false;
 						gui.getLoginButton().setText("logout");
 						gui.getNewChatroomTextField().setEnabled(true);
+						connection.getChatroomList();
 					}
 				} else { //prepare conponents if disconnected
 					logoutFromServer();
@@ -65,47 +66,51 @@ public class ClientGUIController {
 			
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				enterChatroom(chatroomTable.getValueAt(chatroomTable.getSelectedRow(),
+				connection.enterChatroom(chatroomTable.getValueAt(chatroomTable.getSelectedRow(),
 						chatroomTable.getSelectedColumn()).toString());
+				gui.getMessageInputTextField().setEnabled(true);
 			}
 		});
 		
 		gui.getNewChatroomTextField().addKeyListener(new KeyListener() {
 			
 			@Override
-			public void keyTyped(KeyEvent e) {
-				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-					enterChatroom(gui.getNewChatroomTextField().getText());
-				}
-			}
+			public void keyTyped(KeyEvent e) {}
 			
 			@Override
 			public void keyReleased(KeyEvent e) {}
 			
 			@Override
-			public void keyPressed(KeyEvent e) {}
+			public void keyPressed(KeyEvent e) {
+				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+					Contract.LogInfo("CR: " + gui.getNewChatroomTextField().getText());
+					connection.enterChatroom(gui.getNewChatroomTextField().getText());
+					gui.getNewChatroomTextField().setText("");
+				}
+			}
 		});
 		
 		gui.getMessageInputTextField().addKeyListener(new KeyListener() {
 			
 			@Override
-			public void keyTyped(KeyEvent e) {
-				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-					sendMessage(gui.getMessageInputTextField().getText());
-					gui.getMessageInputTextField().setText("");
-				}
-			}
+			public void keyTyped(KeyEvent e) {}
 			
 			@Override
 			public void keyReleased(KeyEvent e) {}
 			
 			@Override
-			public void keyPressed(KeyEvent e) {}
+			public void keyPressed(KeyEvent e) {
+				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+					connection.sendMessage(gui.getMessageInputTextField().getText());
+					gui.getMessageInputTextField().setText("");
+				}
+			}
 		});
 	}
 	
 	private void loginToServer(String username, String address) {
 		connection = new ServerConnection(address, this);
+		connection.sendName(gui.getUserNameTextField().getText());
 	}
 	
 	private void logoutFromServer() {
@@ -114,16 +119,6 @@ public class ClientGUIController {
 		gui.getLoginButton().setText("login");
 		gui.getNewChatroomTextField().setEnabled(false);
 		gui.getMessageInputTextField().setEnabled(false);
-	}
-	
-	private void enterChatroom(String chatroomName) {
-		gui.getMessageInputTextField().setEnabled(true);
-		connection.send("EC" + chatroomName);
-	}
-	
-	private void sendMessage(String text) {
-		connection.send("MG" + text);
-		gui.getMessageInputTextField().setText("");
 	}
 
 	public void setMessage(String message) {

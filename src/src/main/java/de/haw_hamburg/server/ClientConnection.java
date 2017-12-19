@@ -2,7 +2,6 @@ package src.main.java.de.haw_hamburg.server;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
@@ -14,21 +13,21 @@ import src.main.java.de.haw_hamburg.Contract;
 
 public class ClientConnection extends Thread {
 	private Socket socket;
-	private InputStream input;
 	private PrintWriter output;
 	private BufferedReader inputReader;
 	private String name = "";
 	private String chatroomName = "";
 	private final int maxNameLength = 32; //Namelength for Clients and Chatrooms
 	private final char seperator = '\t';
-	private final int maxInputSize = 1024;
+	private final char endLine = '\n';
+	private final int commandLength = 2;
+	private final int maxInputSize = 1024 + commandLength;
 	private final List<String> commands = Arrays.asList(new String[] {"NM", "GC", "EC", "MG", "DC"});
 	
 	public ClientConnection(Socket socket) {
 		this.socket = socket;
 		System.out.println("erstelle verbindung.");
 		try {
-			this.input = socket.getInputStream();
 			this.output = new PrintWriter(socket.getOutputStream(), true);
 			this.inputReader = new BufferedReader(new InputStreamReader(socket.getInputStream()), maxInputSize);
 		} catch (IOException e) {
@@ -51,15 +50,16 @@ public class ClientConnection extends Thread {
 				inputStream = new StringBuilder(maxInputSize);
 				while (inputReader.ready()) {
 					c = (char) inputReader.read();
-					//End reached and dont throwAway chars (positive case)
-					if (c == '\n' && !throwAway) {
+					//End reached and dont throwAway chars and at least 2 chars long (positive case)
+					if (c == endLine && !throwAway && inputStream.length() >= commandLength) {
+						Contract.LogInfo("input: " + inputStream);
 						handleInput(inputStream);
 						//Reset variable
 						c = '-';
 						break;
 					}
-					//End reached and input thrown away
-					if (c == '\n' && throwAway) {
+					//End reached and input thrown away or input to short
+					if (c == endLine && (throwAway || inputStream.length() < commandLength)) {
 						//Reset variables
 						c = '-';
 						throwAway = false;
@@ -72,7 +72,7 @@ public class ClientConnection extends Thread {
 						throwAway = true;
 					}
 					//Check for valid command
-					if (inputStream.length() == 2) {
+					if (inputStream.length() == commandLength) {
 						String probableCommand = inputStream.toString();
 						if (!commands.contains(probableCommand)) {
 							throwAway = true;
@@ -83,7 +83,7 @@ public class ClientConnection extends Thread {
 					}
 				}
 			}
-			input.close();
+			inputReader.close();
 		} catch (IOException e) {
 			Contract.logException(e);
 		}
@@ -97,9 +97,9 @@ public class ClientConnection extends Thread {
 	 */
 	public void send(String message) {
 		synchronized (output) {
-			output.println(message + seperator);
+			output.println(message + endLine);
 		}
-		System.out.println("output: " + message);
+		Contract.LogInfo("output: " + message);
 	}
 	
 	/**
@@ -107,29 +107,27 @@ public class ClientConnection extends Thread {
 	 * @param input: String input.
 	 */
 	private void handleInput(StringBuilder input) {
-		System.out.println("input: " + input);
-		if (input.length() < 2) {
+		if (input.length() < commandLength) {
 			returnError("Send message must be at least 2 Characters long!");
 		}
-		int inputIndex = 2;
-		String command = input.substring(0, inputIndex);
+		String command = input.substring(0, commandLength);
 		switch (command) {
 		case "NM":
-			returnName(input.substring(inputIndex));
+			returnName(input.substring(commandLength));
 			break;
 		case "GC":
 			returnChatrooms();
 			break;
 		case "EC":
 			if (!name.isEmpty()) {
-				enterChatroom(input.substring(inputIndex));
+				enterChatroom(input.substring(commandLength));
 			} else {
 				returnError("The client has no name, so it cannot enter a chatroom!");
 			}
 			break;
 		case "MG":
 			if (!chatroomName.isEmpty()) {
-				shareMessage(input.substring(inputIndex));
+				shareMessage(input.substring(commandLength));
 			} else {
 				returnError("The client ist not a member of a chatroom!");
 			}
@@ -159,13 +157,12 @@ public class ClientConnection extends Thread {
 	 * Sends a list of the available chatrooms to this client.
 	 */
 	private void returnChatrooms() {
-		String controlChar = "\t";
 		StringBuilder returnMessage = new StringBuilder("LC");
 		synchronized (ApplicationServer.chatrooms) {
 			Set<String> chatroomNames = ApplicationServer.chatrooms.keySet();
 			for (String name : chatroomNames) {
 				returnMessage.append(name);
-				returnMessage.append(controlChar);
+				returnMessage.append(seperator);
 			}
 		}
 		send(returnMessage.toString());

@@ -7,6 +7,7 @@ public class ApplicationClient {
 
 	public static void main(String[] args) {
 		Contract.createLogger(true);
+		@SuppressWarnings("unused")
 		ClientGUIController clientGUIController = new ClientGUIController();
 	}
 

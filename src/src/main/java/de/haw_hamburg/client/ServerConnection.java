@@ -1,24 +1,29 @@
 package src.main.java.de.haw_hamburg.client;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.Scanner;
+import java.util.ArrayList;
 
 import src.main.java.de.haw_hamburg.Contract;
 
 public class ServerConnection extends Thread {
 	private Socket socket;
-	private Scanner input;
+	private BufferedReader inputReader;
 	private PrintWriter output;
 	private ClientGUIController clientGUIController;
-	private final char seperator = '\t';
+	private final String seperator = "\t";
+	private final char endLine = '\n';
+	private final int commandLength = 2;
+	private final int maxInputSize = 1024 + commandLength;
 
 	public ServerConnection(String hostAddress, ClientGUIController clientGUIController) {
 		try {
 			this.socket = new Socket(hostAddress, ApplicationClient.port);
-			this.input = new Scanner(socket.getInputStream());
+			this.inputReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			this.output = new PrintWriter(socket.getOutputStream(), true);
 		} catch (UnknownHostException e) {
 			Contract.logException(e);
@@ -34,12 +39,28 @@ public class ServerConnection extends Thread {
 	 */
 	@Override
 	public void run() {
-		while (!isInterrupted()) {
-			if (input.hasNextLine()) {
-				handleInput(input.next());
+		StringBuilder inputStream;
+		char c = '-';
+		try {
+			while (!isInterrupted()) {
+				inputStream = new StringBuilder();
+				while (inputReader.ready()) {
+					c = (char) inputReader.read();
+					//If end of line and long enough
+					if (c == endLine && inputStream.length() >= commandLength) {
+						handleInput(inputStream);
+						break;
+					} else if (c == endLine && inputStream.length() < commandLength) {
+						break;
+					} else {
+						inputStream.append(c);
+					}
+				}
 			}
+			inputReader.close();
+		} catch (IOException e) {
+			Contract.logException(e);
 		}
-		input.close();
 		output.flush();
 		output.close();
 	}
@@ -51,12 +72,12 @@ public class ServerConnection extends Thread {
 	public void send(String message) {
 		Contract.LogInfo("Output: " + message);
 		synchronized (output) {
-			output.println(message + "\n");
+			output.println(message + endLine);
 		}
 		System.out.println("output: " + message);
 	}
 
-	private void handleInput(String input) {
+	private void handleInput(StringBuilder input) {
 		Contract.LogInfo("Input: " + input);
 		System.out.println("input: " + input);
 		if (input.length() < 2) {
@@ -72,7 +93,8 @@ public class ServerConnection extends Thread {
 			listChatrooms(input.substring(inputIndex));
 			break;
 		case "EC":
-			
+			String[] chatrooms = input.substring(inputIndex).split(seperator);
+			clientGUIController.setChatroomList(chatrooms);
 			break;
 		case "MG":
 			clientGUIController.setMessage(input.substring(inputIndex));
@@ -85,8 +107,36 @@ public class ServerConnection extends Thread {
 			break;
 		}
 	}
+	
+	public void getChatroomList() {
+		send("GC");
+	}
 
 	private void listChatrooms(String chatrooms) {
-		clientGUIController.setChatroomList(chatrooms.split("\t"));
+		ArrayList<String> tmpList = new ArrayList<>();
+		for (String room : chatrooms.split(seperator)) {
+			if (room != null && !room.isEmpty()) {
+				tmpList.add(room);
+			}
+		}
+		String[] rooms = new String[0];
+		rooms = tmpList.toArray(rooms);
+		clientGUIController.setChatroomList(rooms);
+	}
+	
+	public void enterChatroom(String chatroomName) {
+		send("EC" + chatroomName);
+	}
+	
+	public void sendMessage(String text) {
+		String message = "MG" + text;
+		if (message.length() > maxInputSize) {
+			message = message.substring(0, maxInputSize);
+		}
+		send(message);
+	}
+	
+	public void sendName(String name) {
+		send("NM" + name);
 	}
 }
