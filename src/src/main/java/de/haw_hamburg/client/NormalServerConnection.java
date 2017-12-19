@@ -10,17 +10,17 @@ import java.util.ArrayList;
 
 import src.main.java.de.haw_hamburg.Contract;
 
-public class ServerConnection extends Thread implements Connection {
+public class NormalServerConnection extends Thread implements Connection {
 	private Socket socket;
 	private BufferedReader inputReader;
 	private PrintWriter output;
 	private ClientGUIController clientGUIController;
+	private String clientName = "";
 	private final String seperator = "\t";
-	private final char endLine = '\n';
-	private final int commandLength = 2;
-	private final int maxInputSize = 1024 + commandLength;
-
-	public ServerConnection(String hostAddress, ClientGUIController clientGUIController) {
+	private final char lastAnswerPrefix = '-';
+	
+	public NormalServerConnection(String hostAddress,
+			ClientGUIController clientGUIController, String clientName) {
 		try {
 			this.socket = new Socket(hostAddress, ApplicationClient.port);
 			this.inputReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -31,6 +31,7 @@ public class ServerConnection extends Thread implements Connection {
 			Contract.logException(e);
 		}
 		this.clientGUIController = clientGUIController;
+		this.clientName = clientName;
 		start();
 	}
 	
@@ -47,10 +48,8 @@ public class ServerConnection extends Thread implements Connection {
 				while (inputReader.ready()) {
 					c = (char) inputReader.read();
 					//If end of line and long enough
-					if (c == endLine && inputStream.length() >= commandLength) {
+					if (c == endLine) {
 						handleInput(inputStream);
-						break;
-					} else if (c == endLine && inputStream.length() < commandLength) {
 						break;
 					} else {
 						inputStream.append(c);
@@ -64,7 +63,7 @@ public class ServerConnection extends Thread implements Connection {
 		output.flush();
 		output.close();
 	}
-	
+
 	/**
 	 * Sends a without control-shortcut to this client.
 	 * @param message: String message.
@@ -72,40 +71,26 @@ public class ServerConnection extends Thread implements Connection {
 	public void send(String message) {
 		Contract.LogInfo("Output: " + message);
 		synchronized (output) {
-			output.println(message + endLine);
+			output.println(message);
 		}
 		System.out.println("output: " + message);
 	}
 
-	private void handleInput(StringBuilder input) {
-		Contract.LogInfo("Input: " + input);
-		System.out.println("input: " + input);
-		if (input.length() < 2) {
-			Contract.logException(new Exception("Send message must be at least 2 Characters long!"));
+	private void handleInput(StringBuilder inputStream) {
+		if (beginnsWith(inputStream, "-SELECTNAME")) {
+			sendName(clientName);
 		}
-		int inputIndex = 2;
-		String command = input.substring(0, inputIndex);
-		switch (command) {
-		case "NM":
-			clientGUIController.setName(input.substring(inputIndex));
-			break;
-		case "LC":
-			listChatrooms(input.substring(inputIndex));
-			break;
-		case "EC":
-			String[] chatrooms = input.substring(inputIndex).split(seperator);
-			clientGUIController.setChatroomList(chatrooms);
-			break;
-		case "MG":
-			clientGUIController.setMessage(input.substring(inputIndex));
-			break;
-		case "ER":
-			Contract.LogInfo("Error: " + input.substring(inputIndex));
-			break;
-		default:
-			Contract.LogInfo("The command " + command + " is not valid!");
-			break;
+		if (beginnsWith(inputStream, "ROOMS")) {
+			listChatrooms(inputStream.substring("ROOMS".length()));
 		}
+		if (beginnsWith(inputStream, "-BYE BYE")) {
+			this.interrupt();
+		}
+	}
+	
+	private boolean beginnsWith(StringBuilder inputStream, String command) {
+		return (inputStream.length() >= command.length())
+				&& (inputStream.subSequence(0, command.length()).equals(command));
 	}
 	
 	public void getChatroomList() {
@@ -113,34 +98,34 @@ public class ServerConnection extends Thread implements Connection {
 	}
 
 	private void listChatrooms(String chatrooms) {
-		ArrayList<String> tmpList = new ArrayList<>();
-		for (String room : chatrooms.split(seperator)) {
-			if (room != null && !room.isEmpty()) {
-				tmpList.add(room);
+		//If just "-"
+		if (chatrooms.length() == 1) {
+			ArrayList<String> tmpList = new ArrayList<>();
+			for (String room : chatrooms.split(seperator)) {
+				if (room != null && !room.isEmpty()) {
+					tmpList.add(room);
+				}
 			}
+			String[] rooms = new String[0];
+			rooms = tmpList.toArray(rooms);
+			clientGUIController.setChatroomList(rooms);
 		}
-		String[] rooms = new String[0];
-		rooms = tmpList.toArray(rooms);
-		clientGUIController.setChatroomList(rooms);
 	}
 	
 	public void enterChatroom(String chatroomName) {
-		send("EC" + chatroomName);
-	}
-	
-	public void sendMessage(String text) {
-		String message = "MG" + text;
-		if (message.length() > maxInputSize) {
-			message = message.substring(0, maxInputSize);
-		}
-		send(message);
+		send("JOIN: " + chatroomName);
 	}
 	
 	public void sendName(String name) {
-		send("NM" + name);
+		send(name);
+	}
+	
+	public void sendMessage(String text) {
+		send("Message: " + text);
 	}
 	
 	public void disconnect() {
+		send("QUIT");
 		this.interrupt();
 	}
 }

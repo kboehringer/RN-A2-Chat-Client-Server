@@ -16,7 +16,7 @@ public class ClientGUIController {
 	private ClientGUI gui;
 	private boolean readyToLogIn = true;
 	private StringBuilder messageHistory;
-	private ServerConnection connection;
+	private Connection connection;
 	
 	public ClientGUIController() {
 		gui = new ClientGUI();
@@ -114,7 +114,7 @@ public class ClientGUIController {
 	}
 	
 	private void logoutFromServer() {
-		connection.interrupt();
+		connection.disconnect();
 		readyToLogIn = true;
 		gui.getLoginButton().setText("login");
 		gui.getNewChatroomTextField().setEnabled(false);
