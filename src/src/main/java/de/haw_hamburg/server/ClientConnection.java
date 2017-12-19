@@ -21,7 +21,7 @@ public class ClientConnection extends Thread {
 	private final char seperator = '\t';
 	private final char endLine = '\n';
 	private final int commandLength = 2;
-	private final int maxInputSize = 1024 + commandLength;
+	private final int maxInputSize = 1024 + commandLength + 2;
 	private final List<String> commands = Arrays.asList(new String[] {"NM", "GC", "EC", "MG", "DC"});
 	
 	public ClientConnection(Socket socket) {
@@ -107,6 +107,7 @@ public class ClientConnection extends Thread {
 	 * @param input: String input.
 	 */
 	private void handleInput(StringBuilder input) {
+		Contract.LogInfo("input: " + input);
 		if (input.length() < commandLength) {
 			returnError("Send message must be at least 2 Characters long!");
 		}
