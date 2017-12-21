@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import src.main.java.de.haw_hamburg.Contract;
 
 public class NormalServerConnection extends Thread implements Connection {
+	private final int PORT = 9002;
 	private Socket socket;
 	private BufferedReader inputReader;
 	private PrintWriter output;
@@ -18,11 +19,13 @@ public class NormalServerConnection extends Thread implements Connection {
 	private String clientName = "";
 	private final String seperator = "\t";
 	private final char lastAnswerPrefix = '-';
+	private boolean getChatrooms = false;
+	private boolean getUsers = false;
 	
 	public NormalServerConnection(String hostAddress,
 			ClientGUIController clientGUIController, String clientName) {
 		try {
-			this.socket = new Socket(hostAddress, ApplicationClient.port);
+			this.socket = new Socket(hostAddress, PORT);
 			this.inputReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			this.output = new PrintWriter(socket.getOutputStream(), true);
 		} catch (UnknownHostException e) {
@@ -40,19 +43,16 @@ public class NormalServerConnection extends Thread implements Connection {
 	 */
 	@Override
 	public void run() {
-		StringBuilder inputStream;
-		char c = '-';
+		ArrayList<String> lines = new ArrayList<>();
+		String line = "";
 		try {
 			while (!isInterrupted()) {
-				inputStream = new StringBuilder();
+				lines = new ArrayList<>();
 				while (inputReader.ready()) {
-					c = (char) inputReader.read();
-					//If end of line and long enough
-					if (c == endLine) {
-						handleInput(inputStream);
-						break;
-					} else {
-						inputStream.append(c);
+					line = inputReader.readLine();
+					lines.add(line);
+					if (line.length() < 0 && line.charAt(0) == lastAnswerPrefix) {
+						handleInput(lines);
 					}
 				}
 			}
@@ -76,40 +76,51 @@ public class NormalServerConnection extends Thread implements Connection {
 		System.out.println("output: " + message);
 	}
 
-	private void handleInput(StringBuilder inputStream) {
-		if (beginnsWith(inputStream, "-SELECTNAME")) {
-			sendName(clientName);
-		}
-		if (beginnsWith(inputStream, "ROOMS")) {
-			listChatrooms(inputStream.substring("ROOMS".length()));
-		}
-		if (beginnsWith(inputStream, "-BYE BYE")) {
-			this.interrupt();
+	private void handleInput(ArrayList<String> lines) {
+		if (lines != null && lines.size() > 0) {
+			String line = lines.get(0);
+			if (beginnsWith(lines.get(-1), "-SELECTNAME")) {
+				if (beginnsWith(line, "INVALID")) {
+					clientGUIController.setMessage("Invalid Username!");
+				} else {
+					sendName(clientName);
+				}
+			} else if (beginnsWith(line, "-JOIN_SUCCESSFUL")) {
+				clientGUIController.setMessage("Joined Room");
+			} else if (beginnsWith(line, "-BYE BYE")) {
+				this.interrupt();
+			} else if (getChatrooms) {
+				listChatrooms(lines);
+			} else if (getUsers) {
+				
+			}
 		}
 	}
 	
-	private boolean beginnsWith(StringBuilder inputStream, String command) {
+	private boolean beginnsWith(String inputStream, String command) {
 		return (inputStream.length() >= command.length())
 				&& (inputStream.subSequence(0, command.length()).equals(command));
 	}
 	
 	public void getChatroomList() {
-		send("GC");
+		send("ROOMS");
+		getChatrooms = true;
 	}
 
-	private void listChatrooms(String chatrooms) {
-		//If just "-"
-		if (chatrooms.length() == 1) {
-			ArrayList<String> tmpList = new ArrayList<>();
-			for (String room : chatrooms.split(seperator)) {
-				if (room != null && !room.isEmpty()) {
-					tmpList.add(room);
-				}
-			}
-			String[] rooms = new String[0];
-			rooms = tmpList.toArray(rooms);
-			clientGUIController.setChatroomList(rooms);
+	private void listChatrooms(ArrayList<String> chatrooms) {
+		clientGUIController.setChatroomList(listStringsToArray(chatrooms));
+		getChatrooms = false;
+	}
+	
+	private String[] listStringsToArray(ArrayList<String> strings) {
+		String[] rooms = new String[0];
+		if (strings.get(0).length() == 1 && strings.get(0).charAt(0) == lastAnswerPrefix) {
+			clientGUIController.setMessage("No Chatrooms avaiable!");
+		} else {
+			rooms = strings.toArray(rooms);
+			rooms[-1] = rooms[-1].substring(1);
 		}
+		return rooms;
 	}
 	
 	public void enterChatroom(String chatroomName) {

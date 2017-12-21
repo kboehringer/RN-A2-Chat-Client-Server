@@ -19,6 +19,7 @@ public class ClientGUIController {
 	private Connection connection;
 	
 	public ClientGUIController() {
+		//TODO Chatroom-liste aktualisieren wenn neuer chatroom irgendwo erstellt wird!
 		gui = new ClientGUI();
 		messageHistory = new StringBuilder();
 		handleControlls();
