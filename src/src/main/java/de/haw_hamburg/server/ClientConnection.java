@@ -39,6 +39,7 @@ public class ClientConnection extends Thread {
 	/**
 	 * Runs the client, is called when creating this object.
 	 * Waits for input from a client, input can at least be 1024 characters long.
+	 * https://stackoverflow.com/questions/17084657/most-robust-way-of-reading-a-file-or-stream-using-java-to-prevent-dos-attacks/17142341#17142341
 	 */
 	@Override
 	public void run() {

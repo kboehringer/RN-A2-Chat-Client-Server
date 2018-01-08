@@ -3,7 +3,7 @@ package src.main.java.de.haw_hamburg.client;
 import src.main.java.de.haw_hamburg.Contract;
 
 public class ApplicationClient {
-	public final static int port = 55533;
+	public final static int port = 9003;
 
 	public static void main(String[] args) {
 		Contract.createLogger(true);

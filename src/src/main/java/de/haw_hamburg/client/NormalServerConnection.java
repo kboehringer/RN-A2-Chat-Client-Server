@@ -92,7 +92,7 @@ public class NormalServerConnection extends Thread implements Connection {
 			} else if (getChatrooms) {
 				listChatrooms(lines);
 			} else if (getUsers) {
-				
+				//TODO
 			}
 		}
 	}

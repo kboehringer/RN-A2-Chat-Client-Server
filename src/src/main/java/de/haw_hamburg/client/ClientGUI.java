@@ -159,4 +159,8 @@ public class ClientGUI /**extends JFrame**/ {
 	public JTextArea getMessageOutputTextArea() {
 		return messageOutputTextArea;
 	}
+
+	public JPanel getContentPane() {
+		return contentPane;
+	}
 }

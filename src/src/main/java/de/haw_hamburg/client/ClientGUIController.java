@@ -17,9 +17,10 @@ public class ClientGUIController {
 	private boolean readyToLogIn = true;
 	private StringBuilder messageHistory;
 	private Connection connection;
+	private long keyTimer = 0;
+	private final long TIMING = 1000;
 	
 	public ClientGUIController() {
-		//TODO Chatroom-liste aktualisieren wenn neuer chatroom irgendwo erstellt wird!
 		gui = new ClientGUI();
 		messageHistory = new StringBuilder();
 		handleControlls();
@@ -104,6 +105,23 @@ public class ClientGUIController {
 				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
 					connection.sendMessage(gui.getMessageInputTextField().getText());
 					gui.getMessageInputTextField().setText("");
+				}
+			}
+		});
+		gui.getContentPane().addKeyListener(new KeyListener() {
+			
+			@Override
+			public void keyTyped(KeyEvent e) {}
+			
+			@Override
+			public void keyReleased(KeyEvent e) {}
+			
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if (e.getKeyCode() == KeyEvent.VK_F5 &&
+						(System.currentTimeMillis() > keyTimer + TIMING)) {
+					connection.getChatroomList();
+					keyTimer = System.currentTimeMillis();
 				}
 			}
 		});

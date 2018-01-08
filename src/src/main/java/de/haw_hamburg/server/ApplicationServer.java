@@ -7,7 +7,7 @@ import java.util.Map;
 import src.main.java.de.haw_hamburg.Contract;
 
 public class ApplicationServer {
-	public final static int port = 55533;
+	public final static int port = 9003;
 //	public static List<Chatroom> chatrooms = Collections.synchronizedList(new ArrayList<Chatroom>());
 	public static Map<String, Chatroom> chatrooms = Collections.synchronizedMap(new HashMap<String, Chatroom>());
 
