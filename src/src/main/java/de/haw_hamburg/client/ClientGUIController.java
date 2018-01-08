@@ -19,10 +19,25 @@ public class ClientGUIController {
 	private Connection connection;
 	private long keyTimer = 0;
 	private final long TIMING = 1000;
+	private KeyListener refreshKey;
 	
 	public ClientGUIController() {
 		gui = new ClientGUI();
 		messageHistory = new StringBuilder();
+		refreshKey = new KeyListener() {
+			@Override
+			public void keyTyped(KeyEvent e) {}
+			@Override
+			public void keyReleased(KeyEvent e) {}
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if (e.getKeyCode() == KeyEvent.VK_F5 &&
+						(System.currentTimeMillis() > keyTimer + TIMING)) {
+					connection.getChatroomList();
+					keyTimer = System.currentTimeMillis();
+				}
+			}
+		};
 		handleControlls();
 	}
 
@@ -87,6 +102,7 @@ public class ClientGUIController {
 				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
 					Contract.LogInfo("CR: " + gui.getNewChatroomTextField().getText());
 					connection.enterChatroom(gui.getNewChatroomTextField().getText());
+					connection.getChatroomList();
 					gui.getNewChatroomTextField().setText("");
 				}
 			}
@@ -108,23 +124,10 @@ public class ClientGUIController {
 				}
 			}
 		});
-		gui.getContentPane().addKeyListener(new KeyListener() {
-			
-			@Override
-			public void keyTyped(KeyEvent e) {}
-			
-			@Override
-			public void keyReleased(KeyEvent e) {}
-			
-			@Override
-			public void keyPressed(KeyEvent e) {
-				if (e.getKeyCode() == KeyEvent.VK_F5 &&
-						(System.currentTimeMillis() > keyTimer + TIMING)) {
-					connection.getChatroomList();
-					keyTimer = System.currentTimeMillis();
-				}
-			}
-		});
+		gui.getChatroomTable().addKeyListener(refreshKey);
+		gui.getMessageInputTextField().addKeyListener(refreshKey);
+		gui.getMessageOutputTextArea().addKeyListener(refreshKey);
+		gui.getNewChatroomTextField().addKeyListener(refreshKey);
 	}
 	
 	private void loginToServer(String username, String address) {
@@ -150,8 +153,10 @@ public class ClientGUIController {
 	}
 	
 	public void setChatroomList(String[] chatrooms) {
-		DefaultTableModel model = new DefaultTableModel(new String[] {"Chatraeume"}, 1);
-		model.addRow(chatrooms);
+		DefaultTableModel model = new DefaultTableModel(new String[] {"Chatraeume"}, chatrooms.length);
 		gui.getChatroomTable().setModel(model);
+		for (int i = 0; i < chatrooms.length; i++) {
+			gui.getChatroomTable().getModel().setValueAt(chatrooms[i], i, 0);
+		}
 	}
 }

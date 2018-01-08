@@ -6,7 +6,6 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
 
 import src.main.java.de.haw_hamburg.Contract;
 
@@ -113,15 +112,14 @@ public class ServerConnection extends Thread implements Connection {
 	}
 
 	private void listChatrooms(String chatrooms) {
-		ArrayList<String> tmpList = new ArrayList<>();
-		for (String room : chatrooms.split(seperator)) {
-			if (room != null && !room.isEmpty()) {
-				tmpList.add(room);
-			}
-		}
-		String[] rooms = new String[0];
-		rooms = tmpList.toArray(rooms);
-		clientGUIController.setChatroomList(rooms);
+//		ArrayList<String> tmpList = new ArrayList<>();
+//		for (String room : chatrooms.split(seperator)) {
+//			if (room != null && !room.isEmpty()) {
+//				tmpList.add(room);
+//			}
+//		}
+//		String[] rooms = new String[tmpList.size()];
+		clientGUIController.setChatroomList(chatrooms.split(seperator));
 	}
 	
 	public void enterChatroom(String chatroomName) {

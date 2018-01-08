@@ -163,4 +163,8 @@ public class ClientGUI /**extends JFrame**/ {
 	public JPanel getContentPane() {
 		return contentPane;
 	}
+
+	public JFrame getFrame() {
+		return frame;
+	}
 }

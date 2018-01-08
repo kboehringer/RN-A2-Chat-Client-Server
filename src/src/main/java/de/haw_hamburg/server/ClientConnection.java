@@ -15,7 +15,7 @@ public class ClientConnection extends Thread {
 	private Socket socket;
 	private PrintWriter output;
 	private BufferedReader inputReader;
-	private String name = "";
+	private String userName = "";
 	private String chatroomName = "";
 	private final int maxNameLength = 32; //Namelength for Clients and Chatrooms
 	private final char seperator = '\t';
@@ -53,7 +53,6 @@ public class ClientConnection extends Thread {
 					c = (char) inputReader.read();
 					//End reached and dont throwAway chars and at least 2 chars long (positive case)
 					if (c == endLine && !throwAway && inputStream.length() >= commandLength) {
-						Contract.LogInfo("input: " + inputStream);
 						handleInput(inputStream);
 						//Reset variable
 						c = '-';
@@ -121,7 +120,7 @@ public class ClientConnection extends Thread {
 			returnChatrooms();
 			break;
 		case "EC":
-			if (!name.isEmpty()) {
+			if (!userName.isEmpty()) {
 				enterChatroom(input.substring(commandLength));
 			} else {
 				returnError("The client has no name, so it cannot enter a chatroom!");
@@ -151,7 +150,7 @@ public class ClientConnection extends Thread {
 		if (name.length() > maxNameLength) {
 			name = name.substring(0, maxNameLength);
 		}
-		this.name = name;
+		this.userName = name;
 		send("NM" + name);
 	}
 	
@@ -175,23 +174,29 @@ public class ClientConnection extends Thread {
 	 * a new chatroom will be created.
 	 * @param name: String name
 	 */
-	private void enterChatroom(String name) {
-		if (name.length() > maxNameLength) {
-			name = name.substring(0, maxNameLength);
+	private void enterChatroom(String newChatroomName) {
+		if (newChatroomName.length() > maxNameLength) {
+			newChatroomName = newChatroomName.substring(0, maxNameLength);
 		}
 		Chatroom chatroom;
+		if (!chatroomName.isEmpty()) {
+			synchronized (ApplicationServer.chatrooms) {
+				chatroom = ApplicationServer.chatrooms.get(chatroomName);
+			}
+			chatroom.leave(this);
+		}
 		synchronized (ApplicationServer.chatrooms) {
 			Set<String> chatroomNames = ApplicationServer.chatrooms.keySet();
-			if (chatroomNames.contains(name)) {
-				chatroom = ApplicationServer.chatrooms.get(name);
+			if (chatroomNames.contains(newChatroomName)) {
+				chatroom = ApplicationServer.chatrooms.get(newChatroomName);
 			} else {
-				chatroom = new Chatroom(name);
-				ApplicationServer.chatrooms.put(name, chatroom);
+				chatroom = new Chatroom(newChatroomName);
+				ApplicationServer.chatrooms.put(newChatroomName, chatroom);
 			}
 		}
 		chatroom.enter(this);
-		chatroomName = name;
-		send("EC" + name);
+		chatroomName = newChatroomName;
+		send("EC" + newChatroomName);
 	}
 	
 	/**
@@ -213,7 +218,7 @@ public class ClientConnection extends Thread {
 		}
 		synchronized (chatroom.getClientList()) {
 			for (ClientConnection clientConnection : chatroom.getClientList()) {
-				if (!clientConnection.getName().equals(name)) {
+				if (!clientConnection.getName().equals(userName)) {
 					clientConnection.send("MG" + substring);
 				}
 			}
