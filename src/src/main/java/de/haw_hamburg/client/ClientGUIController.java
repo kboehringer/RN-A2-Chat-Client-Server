@@ -57,7 +57,7 @@ public class ClientGUIController {
 						loginToServer(userName, address);
 						readyToLogIn = false;
 						gui.getLoginButton().setText("logout");
-						gui.getNewChatroomTextField().setEnabled(true);
+						gui.getNewChatroomTextField().setEnabled(false);
 						connection.getChatroomList();
 					}
 				} else { //prepare conponents if disconnected
@@ -102,7 +102,7 @@ public class ClientGUIController {
 				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
 					Contract.LogInfo("CR: " + gui.getNewChatroomTextField().getText());
 					connection.enterChatroom(gui.getNewChatroomTextField().getText());
-					connection.getChatroomList();
+//					connection.getChatroomList();
 					gui.getNewChatroomTextField().setText("");
 				}
 			}
@@ -131,7 +131,7 @@ public class ClientGUIController {
 	}
 	
 	private void loginToServer(String username, String address) {
-		connection = new ServerConnection(address, this);
+		connection = new NormalServerConnection(address, this, username);
 		connection.sendName(gui.getUserNameTextField().getText());
 	}
 	

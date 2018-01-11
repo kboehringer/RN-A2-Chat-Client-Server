@@ -17,10 +17,10 @@ public class NormalServerConnection extends Thread implements Connection {
 	private PrintWriter output;
 	private ClientGUIController clientGUIController;
 	private String clientName = "";
-	private final String seperator = "\t";
+//	private final String seperator = "\t";
 	private final char lastAnswerPrefix = '-';
 	private boolean getChatrooms = false;
-	private boolean getUsers = false;
+	private boolean canGetMessages = false;
 	
 	public NormalServerConnection(String hostAddress,
 			ClientGUIController clientGUIController, String clientName) {
@@ -50,18 +50,21 @@ public class NormalServerConnection extends Thread implements Connection {
 				lines = new ArrayList<>();
 				while (inputReader.ready()) {
 					line = inputReader.readLine();
+					Contract.LogInfo("Input: " + line);
 					lines.add(line);
-					if (line.length() < 0 && line.charAt(0) == lastAnswerPrefix) {
+					if (canGetMessages || (line.length() > 0 && line.charAt(0) == lastAnswerPrefix)) {
 						handleInput(lines);
+						lines.clear();
 					}
 				}
 			}
 			inputReader.close();
+			output.flush();
+			output.close();
+			socket.close();
 		} catch (IOException e) {
 			Contract.logException(e);
 		}
-		output.flush();
-		output.close();
 	}
 
 	/**
@@ -73,26 +76,34 @@ public class NormalServerConnection extends Thread implements Connection {
 		synchronized (output) {
 			output.println(message);
 		}
-		System.out.println("output: " + message);
 	}
 
 	private void handleInput(ArrayList<String> lines) {
 		if (lines != null && lines.size() > 0) {
 			String line = lines.get(0);
-			if (beginnsWith(lines.get(-1), "-SELECTNAME")) {
+			if (lines.contains("-SELECTNAME")) {
 				if (beginnsWith(line, "INVALID")) {
 					clientGUIController.setMessage("Invalid Username!");
 				} else {
 					sendName(clientName);
 				}
+			} else if (beginnsWith(line, "-ACCEPTED")) {
+				getChatroomList();
 			} else if (beginnsWith(line, "-JOIN_SUCCESSFUL")) {
-				clientGUIController.setMessage("Joined Room");
-			} else if (beginnsWith(line, "-BYE BYE")) {
+				getChatrooms = false;
+				canGetMessages = true;
+			} else if (beginnsWith(line, "-BYE")) {
 				this.interrupt();
+			} else if (beginnsWith(line, "-INVALID_MESSAGE_FORMAT")) {
+				clientGUIController.setMessage("Invalid Message format!");
+			} else if (beginnsWith(line, "-UNKNOWN_COMMAND")) {
+				clientGUIController.setMessage("Unknown command!");
 			} else if (getChatrooms) {
 				listChatrooms(lines);
-			} else if (getUsers) {
-				//TODO
+			} else if (canGetMessages) {
+				clientGUIController.setMessage(line);
+			} else {
+				Contract.LogInfo("Unknown Command: " + line);
 			}
 		}
 	}
@@ -103,13 +114,13 @@ public class NormalServerConnection extends Thread implements Connection {
 	}
 	
 	public void getChatroomList() {
-		send("ROOMS");
 		getChatrooms = true;
+		send("ROOMS");
 	}
 
 	private void listChatrooms(ArrayList<String> chatrooms) {
-		clientGUIController.setChatroomList(listStringsToArray(chatrooms));
 		getChatrooms = false;
+		clientGUIController.setChatroomList(listStringsToArray(chatrooms));
 	}
 	
 	private String[] listStringsToArray(ArrayList<String> strings) {
@@ -118,13 +129,14 @@ public class NormalServerConnection extends Thread implements Connection {
 			clientGUIController.setMessage("No Chatrooms avaiable!");
 		} else {
 			rooms = strings.toArray(rooms);
-			rooms[-1] = rooms[-1].substring(1);
+			rooms[rooms.length -1 ] = rooms[rooms.length -1].substring(1);
 		}
 		return rooms;
 	}
 	
 	public void enterChatroom(String chatroomName) {
 		send("JOIN: " + chatroomName);
+		getChatrooms = false;
 	}
 	
 	public void sendName(String name) {
@@ -132,7 +144,7 @@ public class NormalServerConnection extends Thread implements Connection {
 	}
 	
 	public void sendMessage(String text) {
-		send("Message: " + text);
+		send("MESSAGE: " + text);
 	}
 	
 	public void disconnect() {
