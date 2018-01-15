@@ -1,0 +1,24 @@
+Script ausführbar machen:
+chmod +x /pfad/zu/mein_Skript
+
+4
+http://www.linuxhaven.de/dlhp/HOWTO/DE-Netzwerk-HOWTO-8.html
+Die Routingtabelle kann so angezeigt werden:
+ip route
+
+Auf meinem Rechner ergibt sich folgende Ausgabe:
+207.149.43.62 dev eth0  scope link
+207.149.43.0/24 dev eth0  proto kernel  scope link  src 207.149.43.62
+default via 207.149.43.1 dev eth0
+Die erste Zeile »207.149.43.62 dev eth0 scope link« ist dabei die Routingregel für die Schnittstelle.
+
+Die zweite Zeile »207.149.43.0/24 dev eth0 proto kernel scope link src 207.149.43.62« ist eine Regel, die aussagt: alles nach 207.149.43.0 muß über 207.149.43.62 versandt werden.
+Die dritte Zeile »default via 207.149.43.1 dev eth0« ist die Regel für die Defaultroute. 
+Im letzten Abschnitt haben wir das Anzeigen und die Bedeutung der Ausgabe der Routingtabelle besprochen. 
+
+Glücklicherweise ähnelt die Ausgabe der Tabelle der Syntax zu ihrer Erzeugung:
+ip route add 207.149.43.62 dev eth0  scope link
+ip route add 207.149.43.0/24 dev eth0 proto kernel scope link src 207.149.43.62
+ip route add 127.0.0.0/8 dev lo  scope link
+ip route add default via 207.149.43.1 dev eth0
+

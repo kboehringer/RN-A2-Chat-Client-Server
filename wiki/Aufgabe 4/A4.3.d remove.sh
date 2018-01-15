@@ -1,0 +1,1 @@
+iptables -D INPUT -p icmp --icmp-type echo-request -j DROP
