@@ -131,7 +131,7 @@ public class ClientGUIController {
 	}
 	
 	private void loginToServer(String username, String address) {
-		connection = new NormalServerConnection(address, this, username);
+		connection = new ServerConnection(address, this);
 		connection.sendName(gui.getUserNameTextField().getText());
 	}
 	
