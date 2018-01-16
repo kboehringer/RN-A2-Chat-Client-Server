@@ -57,7 +57,7 @@ public class ClientGUIController {
 						loginToServer(userName, address);
 						readyToLogIn = false;
 						gui.getLoginButton().setText("logout");
-						gui.getNewChatroomTextField().setEnabled(false);
+						gui.getNewChatroomTextField().setEnabled(true);
 						connection.getChatroomList();
 					}
 				} else { //prepare conponents if disconnected

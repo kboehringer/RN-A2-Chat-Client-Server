@@ -1,6 +1,9 @@
 Script ausführbar machen:
 chmod +x /pfad/zu/mein_Skript
 
+3
+https://help.ubuntu.com/community/IptablesHowTo
+
 4
 http://www.linuxhaven.de/dlhp/HOWTO/DE-Netzwerk-HOWTO-8.html
 Die Routingtabelle kann so angezeigt werden:
